@@ -1,11 +1,33 @@
-<div align="center">
+# 霓虹蛇遊戲
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+一個使用React和HTML5 Canvas製作的復古風格霓虹蛇遊戲。
 
-  <h1>Built with AI Studio</h2>
+## 本地運行
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+**先決條件：** Node.js
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+1. 安裝依賴：
+   `npm install`
+2. 運行應用：
+   `npm run dev`
 
-</div>
+## 遊戲說明
+
+使用方向鍵或WASD鍵控制蛇移動，吃掉食物增加分數和速度。避免撞牆或撞到自己。
+
+## 建置
+
+`npm run build`
+
+## 部署到GitHub Pages
+
+專案已配置GitHub Actions自動部署到GitHub Pages。
+
+1. 推送程式碼到main分支
+2. 前往GitHub repo設定 > Pages
+3. 將Source設為"GitHub Actions"
+4. 遊戲將自動部署到 https://OAOlin520.github.io/OAOSNAKE0513/
+
+## 預覽
+
+`npm run preview`
