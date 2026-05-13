@@ -4,16 +4,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, Play, RefreshCw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { 
-  CANVAS_HEIGHT, 
-  CANVAS_WIDTH, 
-  GRID_SIZE, 
-  INITIAL_SPEED, 
-  MIN_SPEED, 
-  SPEED_INCREMENT, 
-  THEME 
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  GRID_SIZE,
+  INITIAL_SPEED,
+  MIN_SPEED,
+  SPEED_INCREMENT,
+  THEME,
 } from '../constants';
 import { Direction, GameStatus, Point } from '../types';
 
@@ -259,141 +257,86 @@ export default function SnakeGame() {
     return () => cancelAnimationFrame(requestRef.current);
   }, [status, update, draw]);
 
+  const statusText = status === GameStatus.PLAYING ? '遊戲中' : status === GameStatus.GAME_OVER ? '遊戲結束' : '準備開始';
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] font-mono selection:bg-neon-green/30">
-      {/* Header / HUD */}
-      <div className="w-full max-w-[800px] flex items-center justify-between px-4 py-6 mb-4">
-        <div className="flex flex-col">
-          <h1 className="text-4xl font-bold tracking-tighter text-white flex items-center gap-2">
-            霓虹<span className="text-[#00ff00]">蛇</span>
-            <div className="w-2 h-2 rounded-full bg-[#00ff00] animate-pulse" />
-          </h1>
-          <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">版本 1.0.0 // 系統啟動</p>
-        </div>
-        
-        <div className="flex gap-8">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest">分數</span>
-            <span className="text-2xl font-bold text-[#00ff00]">{score.toString().padStart(4, '0')}</span>
-          </div>
-          <div className="flex flex-col items-end border-l border-gray-800 pl-8">
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest flex items-center gap-1">
-              <Trophy size={10} className="text-yellow-500" /> 最高分
-            </span>
-            <span className="text-2xl font-bold text-white">{highScore.toString().padStart(4, '0')}</span>
-          </div>
-          <div className="flex flex-col items-end border-l border-gray-800 pl-8">
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest">日期時間</span>
-            <span className="text-lg font-bold text-[#00ffff]">{currentTime.toLocaleDateString('zh-TW')} {currentTime.toLocaleTimeString('zh-TW')}</span>
-          </div>
-        </div>
-      </div>
+    <section className="snake-game-container" style={{ color: THEME.text, fontFamily: 'var(--font-mono)' }}>
+      <header style={{ marginBottom: 16 }}>
+        <h1 style={{ fontSize: 28, margin: 0 }}>霓虹蛇遊戲</h1>
+        <p style={{ margin: '8px 0 0' }}>請使用方向鍵或 WASD 控制蛇，吃到食物會加分。</p>
+      </header>
 
-      {/* Game Area */}
-      <div className="relative group">
-        {/* Subtle decorative corners */}
-        <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-gray-800" />
-        <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-gray-800" />
-        <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-gray-800" />
-        <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-gray-800" />
-        
-        <canvas
-          id="game-canvas"
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className="rounded-sm border border-gray-800 shadow-[0_0_50px_rgba(0,0,0,1)] cursor-crosshair"
-        />
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            style={{
+              display: 'block',
+              border: `2px solid ${THEME.accent}`,
+              borderRadius: 12,
+              background: THEME.background,
+            }}
+          />
+        </div>
 
-        {/* Overlays */}
-        <AnimatePresence>
-          {status === GameStatus.IDLE && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-sm"
+        <aside style={{ minWidth: 240, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ padding: 16, border: `1px solid ${THEME.grid}`, borderRadius: 12, background: '#111' }}>
+            <div style={{ marginBottom: 8 }}><strong>狀態：</strong>{statusText}</div>
+            <div style={{ marginBottom: 8 }}><strong>分數：</strong>{score}</div>
+            <div style={{ marginBottom: 8 }}><strong>最高分：</strong>{highScore}</div>
+            <div><strong>時間：</strong>{currentTime.toLocaleTimeString()}</div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={resetGame}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                border: 'none',
+                borderRadius: 10,
+                background: THEME.accent,
+                color: '#000',
+                cursor: 'pointer',
+                fontWeight: 700,
+              }}
             >
-              <motion.div 
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mb-8"
-              >
-                <div className="p-6 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
-                  <Play size={48} className="text-[#00ff00] fill-[#00ff00]" />
-                </div>
-              </motion.div>
-              <h2 className="text-3xl font-bold mb-2 tracking-tight">準備開始？</h2>
-              <p className="text-gray-400 mb-8 max-w-sm text-center text-sm px-4">
-                使用方向鍵或WASD鍵控制系統。吃掉數據包以增加長度和複雜度。
-              </p>
+              {status === GameStatus.PLAYING ? '重新開始' : '開始遊戲'}
+            </button>
+            {status === GameStatus.PLAYING && (
               <button
-                id="start-button"
-                onClick={resetGame}
-                className="px-10 py-4 bg-[#00ff00] text-black font-bold text-sm tracking-widest hover:bg-[#33ff33] transition-colors rounded-sm uppercase shadow-[0_0_20px_rgba(0,255,0,0.3)] transition-transform hover:scale-105 active:scale-95"
+                type="button"
+                onClick={() => setStatus(GameStatus.GAME_OVER)}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  border: `1px solid ${THEME.grid}`,
+                  borderRadius: 10,
+                  background: '#111',
+                  color: THEME.text,
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
               >
-                開始遊戲
+                結束遊戲
               </button>
-            </motion.div>
-          )}
-
-          {status === GameStatus.GAME_OVER && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md rounded-sm border-2 border-red-500/20"
-            >
-              <h2 className="text-6xl font-black mb-4 tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                連接中斷
-              </h2>
-              <div className="flex flex-col items-center gap-1 mb-8">
-                <span className="text-gray-500 uppercase text-[10px] tracking-widest">最終完整度</span>
-                <span className="text-4xl font-bold text-white leading-none">{score} 分</span>
-              </div>
-              <button
-                id="restart-button"
-                onClick={resetGame}
-                className="flex items-center gap-3 px-8 py-4 bg-white text-black font-bold text-sm tracking-widest hover:bg-gray-200 transition-colors rounded-sm uppercase shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-transform hover:scale-105 active:scale-95"
-              >
-                <RefreshCw size={18} /> 重新連接
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Footer Info */}
-      <div className="mt-12 flex flex-col items-center gap-4">
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center gap-2 p-4 border border-gray-900 rounded-lg">
-            <div className="flex gap-1">
-              <div className="w-8 h-8 rounded border border-gray-700 flex items-center justify-center"><ChevronUp size={14} /></div>
-            </div>
-            <div className="flex gap-1">
-              <div className="w-8 h-8 rounded border border-gray-700 flex items-center justify-center"><ChevronLeft size={14} /></div>
-              <div className="w-8 h-8 rounded border border-gray-700 flex items-center justify-center"><ChevronDown size={14} /></div>
-              <div className="w-8 h-8 rounded border border-gray-700 flex items-center justify-center"><ChevronRight size={14} /></div>
-            </div>
-            <span className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">導航</span>
+            )}
           </div>
-          
-          <div className="flex flex-col items-center gap-2 p-4 border border-gray-900 rounded-lg min-w-[120px]">
-             <div className="flex gap-1 items-center mb-1">
-                <div className="w-4 h-4 rounded-full bg-[#ff00ff] shadow-[0_0_8px_#ff00ff]" />
-                <span className="text-xs text-gray-400">目標</span>
-             </div>
-             <div className="flex gap-1 items-center">
-                <div className="w-4 h-4 rounded-sm bg-[#00ff00] shadow-[0_0_8px_#00ff00]" />
-                <span className="text-xs text-gray-400">主機</span>
-             </div>
-             <span className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">圖例</span>
+
+          <div style={{ padding: 16, border: `1px solid ${THEME.grid}`, borderRadius: 12, background: '#111' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: 16 }}>操作</h2>
+            <p style={{ margin: 0, lineHeight: 1.6 }}>
+              Arrow Keys / W A S D<br />
+              吃到食物 +10 分，撞牆或撞到自己則遊戲結束。
+            </p>
           </div>
-        </div>
-        
-        <p className="text-[9px] text-gray-800 uppercase tracking-[0.3em] font-bold">
-          安全協議 // 未檢測到外部干擾
-        </p>
+        </aside>
       </div>
-    </div>
+    </section>
   );
+
+
 }
