@@ -22,6 +22,7 @@ export default function SnakeGame() {
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [status, setStatus] = useState<GameStatus>(GameStatus.IDLE);
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   // Game logic refs to avoid re-renders during the loop
   const snakeRef = useRef<Point[]>([
@@ -40,6 +41,14 @@ export default function SnakeGame() {
   useEffect(() => {
     const saved = localStorage.getItem('snake-high-score');
     if (saved) setHighScore(parseInt(saved, 10));
+  }, []);
+
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   // Random food generator
@@ -272,6 +281,10 @@ export default function SnakeGame() {
               <Trophy size={10} className="text-yellow-500" /> 最高分
             </span>
             <span className="text-2xl font-bold text-white">{highScore.toString().padStart(4, '0')}</span>
+          </div>
+          <div className="flex flex-col items-end border-l border-gray-800 pl-8">
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest">日期時間</span>
+            <span className="text-lg font-bold text-[#00ffff]">{currentTime.toLocaleDateString('zh-TW')} {currentTime.toLocaleTimeString('zh-TW')}</span>
           </div>
         </div>
       </div>
